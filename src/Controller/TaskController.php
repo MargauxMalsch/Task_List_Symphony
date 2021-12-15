@@ -53,6 +53,32 @@ $this->taskRepository = $entityManager->getRepository(Task::class);
             'tasks' => $tasks,
         ]);
     }
+
+    #[Route('/tasks/{id}/update',  name: "update_task")]
+    public function updateTask(int $id, Request $request): Response
+    {
+        $task = $this->taskRepository->find($id);
+
+        if(null === $task){
+            throw new NotFoundHttpException();
+        }
+
+        $form = $this->createForm(TaskType::class, $task);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $task = $form->getData();
+            $this->taskRepository->save($task);
+
+            return $this->redirectToRoute('tasks_list');
+        }
+        return $this->renderForm('task/new.html.twig' , [
+            'form' => $form
+        ]);
+
+    }
+
+
     #[Route('/tasks/{id}',  name: "task_details")]
     public function taskDetails(int $id): Response
     {
